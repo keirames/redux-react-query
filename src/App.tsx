@@ -1,58 +1,76 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
+import React, { useEffect } from 'react';
+import { Link, Route, Routes } from 'react-router-dom';
 import './App.css';
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import Login from './components/Login';
+import Logout from './components/Logout';
+import { add } from './features/none/noneSlice';
+import { useHome } from './services';
 
 function App() {
+  const user = useAppSelector((state) => state.user.value);
+
+  if (!user) {
+    return (
+      <div className="App">
+        <p>Unauthorized</p>
+        <Login />
+      </div>
+    );
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          width: '400px',
+          margin: 'auto',
+        }}
+      >
+        <Link to="/">Home</Link>
+        <Link to="about">About</Link>
+        <Link to="users">Users</Link>
+      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="users" element={<Users />} />
+      </Routes>
+      <Logout />
     </div>
   );
+}
+
+function Home() {
+  const { isLoading, data } = useHome();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(add());
+  }, [dispatch]);
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (!data) return <p>Fail to fetch</p>;
+
+  return (
+    <div>
+      <p>Home</p>
+      {data.map((d) => (
+        <p>{d.name}</p>
+      ))}
+    </div>
+  );
+}
+
+function About() {
+  return <p>About</p>;
+}
+
+function Users() {
+  return <p>Users</p>;
 }
 
 export default App;
